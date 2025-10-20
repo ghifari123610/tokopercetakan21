@@ -1,0 +1,146 @@
+body {
+    margin: 0; /* Override the margin from style.css */
+}
+
+.owner-container {
+    padding: 20px;
+}
+
+.card h3 {
+    color: var(--accent);
+}
+
+#logout-button {
+    background: var(--danger);
+}
+
+.filters {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    align-items: center;
+    flex-wrap: wrap; /* Allow filters to wrap on small screens */
+}
+
+.table-wrapper {
+    overflow-x: auto;
+}
+
+#transactions-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+#transactions-table th, #transactions-table td {
+    border: 1px solid var(--line);
+    padding: 12px;
+    text-align: left;
+}
+
+#transactions-table th {
+    background-color: #252525;
+}
+
+#transactions-table tbody tr:nth-child(odd) {
+    background-color: #1a1a1a;
+}
+
+#transactions-table td .detail-block {
+    font-size: 0.9em;
+    white-space: pre-wrap; /* To show newlines */
+    max-width: 400px;
+    overflow-wrap: break-word;
+}
+
+#transactions-table td .detail-block b {
+    color: var(--accent-light);
+}
+
+.btn-delete {
+    padding: 5px 10px;
+    background-color: var(--danger);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9em;
+}
+
+.btn-delete:hover {
+    opacity: 0.8;
+}
+
+/* Responsive Filters */
+@media (max-width: 600px) {
+    .filters {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .filters input,
+    .filters select,
+    .filters button {
+        width: 100%;
+    }
+}
+
+/* Responsive Table to Card Layout */
+@media (max-width: 768px) {
+  .table-wrapper {
+    overflow-x: hidden; /* Remove horizontal scroll */
+  }
+
+  #transactions-table thead {
+    display: none; /* Hide table headers */
+  }
+
+  #transactions-table, 
+  #transactions-table tbody, 
+  #transactions-table tr, 
+  #transactions-table td {
+    display: block;
+    width: 100%;
+  }
+
+  #transactions-table tr {
+    margin-bottom: 15px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 10px;
+    background-color: #1e1e1e !important; /* Use card color and override alternating color */
+  }
+
+  #transactions-table td {
+    text-align: right;
+    padding-left: 50%;
+    position: relative;
+    border: none;
+    border-bottom: 1px solid var(--line);
+    padding: 10px 8px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+  }
+
+  #transactions-table tr td:last-child {
+      border-bottom: none; /* Remove separator from last item */
+  }
+
+  #transactions-table td::before {
+    content: attr(data-label);
+    position: absolute;
+    left: 10px;
+    width: calc(50% - 20px);
+    padding-right: 10px;
+    white-space: nowrap;
+    text-align: left;
+    font-weight: bold;
+    color: var(--accent);
+  }
+
+  #transactions-table td .detail-block {
+    max-width: 100%;
+    text-align: right;
+  }
+}

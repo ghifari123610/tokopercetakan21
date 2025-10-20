@@ -1,9 +1,11 @@
 document.addEventListener('DOMContentLoaded', () => {
     'use strict';
 
-    const LOGIN_USERNAME = 'adminpercertakan21@gmail.com';
-    const LOGIN_PASSWORD = 'percetakan21';
-    const SESSION_KEY = 'p21_auth_token';
+    const users = {
+        'adminpercertakan21@gmail.com': { password: 'percetakan21', role: 'admin' },
+        'ownerpercetakan21@gmail.com': { password: 'owner21', role: 'owner' }
+    };
+    const SESSION_KEY_ROLE = 'p21_auth_role';
 
     const loginContainer = document.getElementById('login-container');
     const appContainer = document.getElementById('app-container');
@@ -20,37 +22,66 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function showLogin() {
         loginContainer.style.display = 'flex';
-        appContainer.style.display = 'none';
+        if (appContainer) appContainer.style.display = 'none';
+    }
+
+    function navigateToOwnerPage() {
+        window.location.href = 'owner.html';
     }
 
     // Check for session token on page load
-    if (sessionStorage.getItem(SESSION_KEY) === 'true') {
-        showApp();
+    const loggedInUserRole = sessionStorage.getItem(SESSION_KEY_ROLE);
+    if (loggedInUserRole === 'admin') {
+        // If on owner page, redirect to index, otherwise show app
+        if(window.location.pathname.includes('owner.html')) {
+            window.location.href = 'index.html';
+        } else {
+            showApp();
+        }
+    } else if (loggedInUserRole === 'owner') {
+        // If not on owner page, redirect to it
+        if(!window.location.pathname.includes('owner.html')) {
+            navigateToOwnerPage();
+        }
     } else {
-        showLogin();
+        // If not logged in and on owner page, redirect to index
+        if(window.location.pathname.includes('owner.html')) {
+            window.location.href = 'index.html';
+        } else {
+            showLogin();
+        }
     }
 
-    loginForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const username = usernameInput.value;
-        const password = passwordInput.value;
+    if(loginForm) {
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const username = usernameInput.value;
+            const password = passwordInput.value;
+            const user = users[username];
 
-        if (username === LOGIN_USERNAME && password === LOGIN_PASSWORD) {
-            sessionStorage.setItem(SESSION_KEY, 'true');
-            loginError.textContent = '';
-            showApp();
-        } else {
-            loginError.textContent = 'Username atau password salah.';
-        }
-    });
+            if (user && user.password === password) {
+                sessionStorage.setItem(SESSION_KEY_ROLE, user.role);
+                loginError.textContent = '';
+                if (user.role === 'admin') {
+                    showApp();
+                } else if (user.role === 'owner') {
+                    navigateToOwnerPage();
+                }
+            } else {
+                loginError.textContent = 'Username atau password salah.';
+            }
+        });
+    }
+
 
     function initializeApp() {
+        if (document.body.dataset.initialized) return;
+        document.body.dataset.initialized = 'true';
+
         // --- ALL THE ORIGINAL APP CODE --- 
         const CASHIER_KEY = 'K4', CASHIER_NAME = 'Admin 2';
+        const API_URL = 'http://localhost:3000';
         let subActive = false;
-        function buildShiftPayloadCompat(st) { const shift_id = `${st.date}-${st.idx || 1}`; return { date: st.date, jam_mulai: st.start_at, jam_tutup: st.end_at, cashier: CASHIER_NAME, tanggal: st.date, jamMulai: st.start_at, jamTutup: st.end_at, admin: CASHIER_NAME, shift_id, cashier_key: CASHIER_KEY } }
-
-        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbypnXCCg7l5mOz1voSstcK2bske8NDTcvnbS2UgnnWfow6FGCEAlpLnq_v1WTSKGuL-hw/exec';
 
         const $ = (q, r = document) => r.querySelector(q);
         const IDR = n => 'Rp. ' + new Intl.NumberFormat('id-ID').format(Math.max(0, Math.round(n || 0)));
@@ -64,19 +95,25 @@ document.addEventListener('DOMContentLoaded', () => {
         const el = { shiftBadge: $('#shiftStatus'), tz: $('#tzDebug'), kSaldoAwal: $('#kSaldoAwal'), kCash: $('#kCash'), kQris: $('#kQris'), kOmzet: $('#kOmzet'), kExp: $('#kExp'), kLaci: $('#kLaci'), kCashN: $('#kCashN'), kQrisN: $('#kQrisN'), kOmzetN: $('#kOmzetN'), kReal: $('#kReal'), kSelisih: $('#kSelisih'), kSelisihTag: $('#kSelisihTag'), txNama: $('#txNama'), txBarang: $('#txBarang'), txHarga: $('#txHarga'), pill: $('#pricePill'), btnCash: $('#addCash'), btnQris: $('#addQris'), txBody: $('#txBody'), btnStart: $('#btnStart'), btnClose: $('#btnClose'), btnReset: $('#btnReset'), pcCopy: $('#pcCopy'), pcQty: $('#pcQty'), pcType: $('#pcType'), pcAddRow: $('#pcAddRow'), pcBody: $('#pcBody'), pcTotal: $('#pcTotal'), autoHarga: $('#autoHarga'), manualQty: $('#manualQty'), manualCopy: $('#manualCopy'), manualName: $('#manualName'), manualUnitPrice: $('#manualUnitPrice'), manualAdd: $('#manualAdd'), pcTuan: $('#pcTuan'), pcNoHP: $('#pcNoHP'), pcTanggal: $('#pcTanggal'), pcPukul: $('#pcPukul'), pcPanjar: $('#pcPanjar'), pcSisa: $('#pcSisa'), paidStamp: $('#paidStamp'), pcClear: $('#pcClear'), btnPrintReport: $('#btnPrintReport'), fullReport: $('#fullReport'), pcSub: $('#pcSub'), subNote: $('#subNote') };
         const adminSpan = document.getElementById('adminName'); if (adminSpan) adminSpan.textContent = CASHIER_NAME;
 
-        const apiAddTx = async (payload) => {
+        const logoutButton = document.getElementById('admin-logout-button');
+        if(logoutButton) {
+            logoutButton.addEventListener('click', () => {
+                sessionStorage.removeItem(SESSION_KEY_ROLE);
+                window.location.reload();
+            });
+        }
+
+        const saveTransaction = async (payload) => {
             try {
-                const response = await fetch(WEB_APP_URL, {
+                const response = await fetch(`${API_URL}/api/transactions`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify({ type: 'add_tx_simple', payload })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
                 });
                 if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                const jsonData = await response.json();
-                if (jsonData.ok === false) throw new Error(jsonData.error || 'Server error');
-                return jsonData;
+                return await response.json();
             } catch (error) {
-                console.error('❌ Error kirim:', error);
+                console.error('❌ Error saving transaction:', error);
                 throw error;
             }
         };
@@ -94,9 +131,9 @@ document.addEventListener('DOMContentLoaded', () => {
         function initShift() { const openDate = localStorage.getItem(OPEN_KEY); if (openDate) { const st = readState(openDate); if (st && st.start_at && !st.end_at) { applyStarted(st); return } clearOpen() } const today = fmt.ymd(); const stToday = readState(today); if (stToday && stToday.start_at && !stToday.end_at) { localStorage.setItem(OPEN_KEY, today); applyStarted({ ...stToday, date: today }); return } applyIdle() }
         initShift();
 
-        el.btnStart.addEventListener('click', async () => { const openDate = localStorage.getItem(OPEN_KEY); if (openDate) { const st = readState(openDate); if (st && st.start_at && !st.end_at) { st.end_at = fmt.hmsS(); writeState(openDate, st) } clearOpen() } const d = fmt.ymd(); const key = 'p21_shift_count_' + d; const idx = (parseInt(localStorage.getItem(key) || '0', 10) + 1); localStorage.setItem(key, String(idx)); const st = { date: d, start_at: fmt.hmsS(), end_at: null, idx }; writeState(d, st); localStorage.setItem(OPEN_KEY, d); applyStarted(st); toast('Shift ' + idx + ' dimulai'); try { fetch(WEB_APP_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ type: 'shift_start', payload: buildShiftPayloadCompat(st) }) }) } catch (e) { } });
+        el.btnStart.addEventListener('click', async () => { const openDate = localStorage.getItem(OPEN_KEY); if (openDate) { const st = readState(openDate); if (st && st.start_at && !st.end_at) { st.end_at = fmt.hmsS(); writeState(openDate, st) } clearOpen() } const d = fmt.ymd(); const key = 'p21_shift_count_' + d; const idx = (parseInt(localStorage.getItem(key) || '0', 10) + 1); localStorage.setItem(key, String(idx)); const st = { date: d, start_at: fmt.hmsS(), end_at: null, idx }; writeState(d, st); localStorage.setItem(OPEN_KEY, d); applyStarted(st); toast('Shift ' + idx + ' dimulai'); });
 
-        el.btnClose.addEventListener('click', async () => { const d = localStorage.getItem(OPEN_KEY); if (!d) { toast('Tidak ada shift aktif.'); return } const st = readState(d); if (!st || !st.start_at || st.end_at) { clearOpen(); initShift(); return } st.end_at = fmt.hmsS(); writeState(d, st); clearOpen(); applyClosed(st); try { await fetch(WEB_APP_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ type: 'save_shift', payload: { date: st.date, jam_mulai: st.start_at, jam_tutup: st.end_at, cashier: CASHIER_NAME } }) }); toast(`Shift ${st.idx} ditutup & disimpan`) } catch (e) { toast('Gagal menyimpan shift') } });
+        el.btnClose.addEventListener('click', async () => { const d = localStorage.getItem(OPEN_KEY); if (!d) { toast('Tidak ada shift aktif.'); return } const st = readState(d); if (!st || !st.start_at || st.end_at) { clearOpen(); initShift(); return } st.end_at = fmt.hmsS(); writeState(d, st); clearOpen(); applyClosed(st); toast(`Shift ${st.idx} ditutup`); });
 
         el.btnReset.addEventListener('click', () => { if (!confirm('Reset Shift?')) return; try { clearOpen(); Object.keys(localStorage).filter(k => k.startsWith('p21_shift_state_')).forEach(k => localStorage.removeItem(k)); const d = fmt.ymd(); localStorage.removeItem('p21_shift_count_' + d); toast('Shift direset'); initShift() } catch (e) { alert('Gagal reset: ' + e) } });
 
@@ -112,7 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const nextTxNumber = () => { const d = fmt.ymd(); const last = localStorage.getItem(KEY_TX_DATE); let n = 0; if (last === d) n = parseInt(localStorage.getItem(KEY_TX_COUNTER) || '0', 10); n++; localStorage.setItem(KEY_TX_COUNTER, String(n)); localStorage.setItem(KEY_TX_DATE, d); return String(n).padStart(5, '0') };
         function refreshKPI() { const rows = [...(el.txBody.children || [])]; const sumBy = t => rows.filter(r => (r.cells[6]?.textContent || '') === t).reduce((s, r) => s + parseIDR(r.cells[5]?.textContent || '0'), 0); const cntBy = t => rows.filter(r => (r.cells[6]?.textContent || '') === t).length; const cash = sumBy('Cash'), qris = sumBy('QRIS'); const cashN = cntBy('Cash'), qrisN = cntBy('QRIS'); const omzet = cash + qris; const omzetN = cashN + qrisN; const saldoAwal = parseIDR2(el.kSaldoAwal.value), pengeluaran = parseIDR2(el.kExp.value), real = parseIDR2(el.kReal.value); const laci = Math.max(0, saldoAwal + cash - pengeluaran); const selisih = real - laci; const tag = selisih === 0 ? { text: 'PAS' } : (selisih > 0 ? { text: 'LEBIH' } : { text: 'KURANG' }); el.kCash.textContent = IDR(cash); el.kQris.textContent = IDR(qris); el.kOmzet.textContent = IDR(omzet); el.kCashN.textContent = cashN + 'x'; el.kQrisN.textContent = qrisN + 'x'; el.kOmzetN.textContent = omzetN + 'x'; el.kLaci.textContent = IDR(laci); const absVal = Math.abs(selisih); el.kSelisih.textContent = IDR(absVal); el.kSelisihTag.textContent = tag.text; return { cash, qris, omzet, cashN, qrisN, omzetN, laci, real, selisih } }
 
-        const addTx = async (method) => { if (el.pill.style.pointerEvents === 'none') { toast('Mulai shift dulu'); return } const nama = (el.txNama.value || '').trim(), barang = (el.txBarang.value || '').trim(), harga = +(el.txHarga.value || 0); if (!nama || !harga) { toast('Isi nama & harga.'); return } const nowD = new Date(); const { tanggal: witaTgl, jam: witaJam } = witaDateTime(nowD); const tgljam = `${fmt.ymd(nowD)} ${fmt.hmsS(nowD)}`; const num = nextTxNumber(), kode = `${num}-${method.toUpperCase()}`; const row = { Timestamp: tgljam, Tanggal: witaTgl, Jam: witaJam, 'Kode Transaksi': kode, 'Nama Transaksi': nama, Admin: CASHIER_NAME, Barang: barang, Harga: harga, Metode: method }; const tr = document.createElement('tr'); tr.innerHTML = `<td>${row.Timestamp}</td><td>${row['Kode Transaksi']}</td><td>${row['Nama Transaksi']}</td><td>${row.Admin}</td><td>${row.Barang || '-'}</td><td>${IDR(row.Harga)}</td><td>${row.Metode}</td>`; el.txBody.insertBefore(tr, el.txBody.firstChild); el.txNama.value = ''; el.txBarang.value = ''; setPrice(0); updateButtonsState(); try { await apiAddTx(row); toast('Transaksi tersimpan') } catch { toast('Gagal simpan transaksi') } refreshKPI() };
+        const addTx = async (method) => { if (el.pill.style.pointerEvents === 'none') { toast('Mulai shift dulu'); return } const nama = (el.txNama.value || '').trim(), barang = (el.txBarang.value || '').trim(), harga = +(el.txHarga.value || 0); if (!nama || !harga) { toast('Isi nama & harga.'); return } const nowD = new Date(); const { tanggal: witaTgl, jam: witaJam } = witaDateTime(nowD); const tgljam = `${fmt.ymd(nowD)} ${fmt.hmsS(nowD)}`; const num = nextTxNumber(), kode = `${num}-${method.toUpperCase()}`; const row = { Timestamp: tgljam, Tanggal: witaTgl, Jam: witaJam, 'Kode Transaksi': kode, 'Nama Transaksi': nama, Admin: CASHIER_NAME, Barang: barang, Harga: harga, Metode: method, type: 'simple_transaction' }; const tr = document.createElement('tr'); tr.innerHTML = `<td data-label="Timestamp">${row.Timestamp}</td><td data-label="Kode Transaksi">${row['Kode Transaksi']}</td><td data-label="Nama Transaksi">${row['Nama Transaksi']}</td><td data-label="Admin">${row.Admin}</td><td data-label="Ket.">${row.Barang || '-'}</td><td data-label="Harga">${IDR(row.Harga)}</td><td data-label="Metode">${row.Metode}</td>`; el.txBody.insertBefore(tr, el.txBody.firstChild); el.txNama.value = ''; el.txBarang.value = ''; setPrice(0); updateButtonsState(); try { await saveTransaction(row); toast('Transaksi tersimpan') } catch { toast('Gagal simpan transaksi') } refreshKPI() };
 
         el.btnCash?.addEventListener('click', () => addTx('Cash'));
         el.btnQris?.addEventListener('click', () => addTx('QRIS'));
@@ -140,7 +177,7 @@ document.addEventListener('DOMContentLoaded', () => {
         function leaflet1Sisi(q) { if (q <= 0) return 0; const start = 333, end = 285, maxQ = 1000; if (q >= maxQ) return Math.round(q * end); const unit = start + ((q - 1) / (maxQ - 1)) * (end - start); return Math.round(q * unit) }
         function leaflet2Sisi(q) { if (q <= 0) return 0; const start = 666, end = 570, maxQ = 500; if (q >= maxQ) return Math.round(q * end); const unit = start + ((q - 1) / (maxQ - 1)) * (end - start); return Math.round(q * unit) }
         function getTotal(type, qty) { if (type === 'A3 Standar') return a4_total(qty) * 2; if (type === 'A4 Standar') return a4_total(qty); if (type === 'F4 Standar') return f4_total(qty); if (type === 'A4 Full Color') return a4c(qty); if (type === 'F4 Full Color') return f4c(qty); if (type === 'A4 PPT 2 Slide') return ppt(qty); if (type === 'Pas Foto') return pas(qty); if (type === 'Map Bening') return mapBening(qty); if (type === 'Jarak Ongkir Maxim') return jarakOngkirMaxim(qty); if (type === 'Jilid Lakban') return jilidLakban(qty); if (type === 'Ong. Lipat Leaflet') return ongLipatLeaflet(qty); if (type === 'Jilid Antero Biasa') return jilidAnteroBiasa(qty); if (type === 'Antero Laminating') return anteroLaminating(qty); if (type === 'ATK Campur x Rp') return atkCampur(qty); if (type === 'Penjepit Kecil') return penjepitKecil(qty); if (type === 'Penjepit Sedang') return penjepitSedang(qty); if (type === 'Leaflet 1 Sisi') return leaflet1Sisi(qty); if (type === 'Leaflet 2 Sisi') return leaflet2Sisi(qty); return 0 }
-        function makeRow(copy, qty, label, rowTotal, totalLembar) { const unitName = UNIT_MAP[label] || 'Lembar'; const unitPerCopy = copy > 0 ? Math.round(rowTotal / copy) : 0; const tr = document.createElement('tr'); tr.setAttribute('data-raw', String(rowTotal)); tr.setAttribute('data-lembar', String(totalLembar)); tr.innerHTML = `<td class="rangkapCell" data-copy="${copy}" contenteditable="true" inputmode="numeric">${copy} x</td><td class="qtyCell"><div class="qtyBox" title="Klik untuk ganti satuan"><div class="qtyNum">${qty}</div><div class="qtyUnit">${unitName}</div></div></td><td>${label}</td><td class="pcUnit">${IDR2(unitPerCopy)}</td><td class="pcTotal">${IDR2(rowTotal)}</td><td><button class="btn delPc" title="Hapus" style="width:34px;height:34px;font-size:16px;border-radius:10px;background:#3b82f6">×</button></td>`; return tr }
+        function makeRow(copy, qty, label, rowTotal, totalLembar) { const unitName = UNIT_MAP[label] || 'Lembar'; const unitPerCopy = copy > 0 ? Math.round(rowTotal / copy) : 0; const tr = document.createElement('tr'); tr.setAttribute('data-raw', String(rowTotal)); tr.setAttribute('data-lembar', String(totalLembar)); tr.innerHTML = `<td class="rangkapCell" data-label="Rangkap" data-copy="${copy}" contenteditable="true" inputmode="numeric">${copy} x</td><td data-label="Qty" class="qtyCell"><div class="qtyBox" title="Klik untuk ganti satuan"><div class="qtyNum">${qty}</div><div class="qtyUnit">${unitName}</div></div></td><td data-label="Jenis / Nama">${label}</td><td data-label="Harga Satuan" class="pcUnit">${IDR2(unitPerCopy)}</td><td data-label="Jumlah" class="pcTotal">${IDR2(rowTotal)}</td><td data-label="Aksi"><button class="btn delPc" title="Hapus" style="width:34px;height:34px;font-size:16px;border-radius:10px;background:#3b82f6">×</button></td>`; return tr }
         function updateAutoHarga() { const copy = Math.max(1, parseInt(el.pcCopy.value) || 0); const qty = Math.max(1, parseInt(el.pcQty.value) || 0); const type = el.pcType.value || 'A4 Standar'; const totalLembar = copy * qty; if (totalLembar <= 0) { el.autoHarga.value = ''; return } let rowTotal = getTotal(type, totalLembar); if (subActive) rowTotal = Math.round(rowTotal * 0.95); const unitPerLembar = Math.max(0, Math.round(rowTotal / totalLembar)); el.autoHarga.value = unitPerLembar ? IDR2(unitPerLembar) : '' }
         el.pcQty?.addEventListener('input', updateAutoHarga);
         el.pcCopy?.addEventListener('input', updateAutoHarga);
@@ -213,6 +250,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const finalCatatan = `${CASHIER_NAME} : ${catatanInput}${lunasText}`;
 
             const payload = {
+                type: 'detailed_transaction',
                 'Tuan': (el.pcTuan.value || '').trim(),
                 'Nomor HP': (el.pcNoHP.value || '').trim(),
                 'timestamp detail': `${witaTgl} ${witaJam}`,
@@ -224,27 +262,35 @@ document.addEventListener('DOMContentLoaded', () => {
             };
 
             try {
-                const response = await fetch(WEB_APP_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify({ type: 'add_tx_pesanan', payload: payload })
-                });
-                const result = await response.json();
-                if (result.ok) {
-                    toast('✅ Nota tersimpan ke sheet PESANAN!');
-                    return true;
-                } else {
-                    toast('❌ Gagal: ' + (result.error || 'Unknown error'));
-                    return false;
-                }
+                await saveTransaction(payload);
+                toast('✅ Nota tersimpan ke database!');
+                return true;
             } catch (error) {
-                console.error('❌ Network error:', error);
-                toast('❌ Gagal kirim data');
+                toast('❌ Gagal simpan nota');
                 return false;
             }
         }
 
-        const btnSave = document.getElementById('pcSave'); if (btnSave) { btnSave.addEventListener('click', async () => { if (el.pcBody.children.length === 0) { alert('Belum ada item di nota!'); return } const confirmed = confirm('Simpan nota ini ke spreadsheet?'); if (!confirmed) return; await saveCalcToSheet() }) }
+        const btnSave = document.getElementById('pcSave'); 
+        if (btnSave) { 
+            btnSave.addEventListener('click', async () => { 
+                if (el.pcBody.children.length === 0) { alert('Belum ada item di nota!'); return } 
+                const confirmed = confirm('Simpan nota ini ke database?'); 
+                if (!confirmed) return; 
+                await saveCalcToSheet();
+            });
+        }
+
+        const btnSaveAndPrint = document.getElementById('pcSaveAndPrint');
+        if (btnSaveAndPrint) {
+            btnSaveAndPrint.addEventListener('click', async () => {
+                if (el.pcBody.children.length === 0) { alert('Belum ada item di nota!'); return }
+                const success = await saveCalcToSheet();
+                if (success) {
+                    setTimeout(() => window.print(), 200); // Timeout to ensure data is saved and UI updated
+                }
+            });
+        }
         const chkLunas = document.getElementById('chkLunas'); const paidStamp = document.getElementById('paidStamp'); if (chkLunas && paidStamp) { chkLunas.addEventListener('change', () => { paidStamp.style.display = chkLunas.checked ? 'block' : 'none' }) }
         (function enableLeaveGuard() { function shouldGuard() { try { if (document.body.classList.contains('print-report')) return false; var open = localStorage.getItem(OPEN_KEY); var active = false; if (open) { var st = readState(open); active = !!(st && st.start_at && !st.end_at) } var draftPrice = (+el.txHarga.value || 0) > 0; var draftName = (el.txNama.value || '').trim().length > 0 || (el.txBarang.value || '').trim().length > 0; var hasCalcRows = !!(el.pcBody && el.pcBody.children && el.pcBody.children.length > 0); var hasPanjar = (el.pcPanjar && el.pcPanjar.value || '').trim().length > 0; var hasReal = (el.kReal && el.kReal.value || '').trim().length > 0; return active || draftPrice || draftName || hasCalcRows || hasPanjar || hasReal } catch (e) { return false } } window.addEventListener('beforeunload', function (e) { if (!shouldGuard()) return; e.preventDefault(); e.returnValue = '' }) })();
         refreshKPI()

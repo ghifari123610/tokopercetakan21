@@ -249,3 +249,140 @@ input,select,textarea{border:1px solid var(--line);background:#151515;color:#e0e
   font-size: 14px;
   min-height: 20px;
 }
+
+/* Responsive Design */
+@media (max-width: 1100px) {
+  .container {
+    grid-template-columns: 1fr;
+    --col-left: 1fr;
+    --col-right: 1fr;
+  }
+  .splitter {
+    display: none;
+  }
+  #colRight .grid-5 {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  #colRight .grid-5 .field {
+    align-items: stretch;
+  }
+  #colRight .grid-5 .btn {
+    width: 100%;
+  }
+  header {
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 992px) {
+  .kpi {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .kpi {
+    grid-template-columns: 1fr;
+  }
+  #fullReport .kpi-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  #fullReport .two-columns {
+    grid-template-columns: 1fr;
+  }
+
+  /* Responsive Table on Admin Page */
+  #txTable thead {
+    display: none;
+  }
+  #txTable, #txTable tbody, #txTable tr, #txTable td {
+    display: block;
+    width: 100%;
+  }
+  #txTable tr {
+    margin-bottom: 15px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 10px;
+    background-color: #151515 !important; /* Darker item color */
+  }
+  #txTable td {
+    text-align: right;
+    padding-left: 50%;
+    position: relative;
+    border: none;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+  }
+  #txTable td::before {
+    content: attr(data-label);
+    position: absolute;
+    left: 10px;
+    width: calc(50% - 20px);
+    padding-right: 10px;
+    white-space: nowrap;
+    text-align: left;
+    font-weight: bold;
+    color: var(--accent);
+  }
+
+  /* Responsive Nota Table on Admin Page */
+  #colRight .table-shell thead {
+    display: none;
+  }
+  #colRight .table-shell, #colRight .table-shell tbody, #colRight .table-shell tr, #colRight .table-shell td {
+    display: block;
+    width: 100%;
+  }
+  #colRight .table-shell tr {
+    margin-bottom: 10px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 10px;
+    background-color: #f0f0f0;
+  }
+  #colRight .table-shell td {
+    text-align: right;
+    padding-left: 50%;
+    position: relative;
+    border: none;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+  }
+  #colRight .table-shell td::before {
+    content: attr(data-label);
+    position: absolute;
+    left: 10px;
+    width: calc(50% - 20px);
+    padding-right: 10px;
+    white-space: nowrap;
+    text-align: left;
+    font-weight: bold;
+    color: #333;
+  }
+  #colRight .table-shell .qtyBox {
+    flex-direction: row;
+    gap: 5px;
+  }
+}
+
+
+@media (max-width: 576px) {
+  .price-wrap {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .price-pill {
+    min-width: 100%;
+    text-align: center;
+  }
+  #colRight .info {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

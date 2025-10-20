@@ -26,6 +26,7 @@
     <button class="btn btn-green" id="btnStart" type="button">Mulai berjualan</button>
     <button class="btn btn-blue" id="btnClose" type="button" disabled>Tutup kas</button>
     <span class="small" id="btnReset" style="cursor:pointer;text-decoration:underline;margin-left:8px">Reset Shift</span>
+    <button id="admin-logout-button" class="btn" style="background-color: var(--danger); margin-left: 10px;">Logout</button>
   </header>
   <main class="container">
     <section class="card" id="colMid">
@@ -53,7 +54,8 @@
         <button class="btn btn-blue" id="addQris" type="button" disabled>Tambah (QRIS)</button>
         <small class="small">Aktif saat Nama &amp; Harga terisi • Transaksi otomatis tersimpan ke sheet</small>
       </div>
-      <table id="txTable"><thead><tr><th>Timestamp</th><th>Kode Transaksi</th><th>Nama Transaksi</th><th>Admin</th><th>Ket.</th><th>Harga</th><th>Metode</th></tr></thead><tbody id="txBody"></tbody></table>
+      <table id="txTable"><thead><tr>
+      <th>Timestamp</th><th>Kode Transaksi</th><th>Nama Transaksi</th><th>Admin</th><th>Ket.</th><th>Harga</th><th>Metode</th></tr></thead><tbody id="txBody"></tbody></table>
     </section>
     <div class="splitter"></div>
     <section class="card calc-card" id="colRight">
@@ -108,8 +110,9 @@
           <table><thead><tr><th>Rangkap</th><th>Qty</th><th>Jenis / Nama</th><th>Harga Satuan</th><th>Jumlah</th><th>Aksi</th></tr></thead><tbody id="pcBody"></tbody></table>
           <div class="small" style="text-align:left;line-height:1.4;margin:10px 0 6px;padding:6px 10px;color:#000;background:#f5f9ff;border-top:1px solid #dbe2ef;border-radius:0 0 10px 10px"><b>Nb :</b> <span id="subNote">Menggunakan Kalkulator Auto, Banyak Auto Diskon Siap Harga Langganan.</span> <span style="font-size:10px;opacity:0.7">*Total akan dibulatkan ke seribu rupiah</span></div>
         </div>
-        <div class="total-row" style="margin-top:6px;padding:20px;border-left:4px double var(--accent);border-right:4px double var(--accent);border-top:4px double var(--accent);border-bottom:4px double var(--accent);border-radius:8px;position:relative;min-height:160px">
-          <button id="pcSave" type="button" class="btn" style="position:absolute;top:-50px;right:0;height:40px;width:auto;font-size:12px;background:var(--accent);color:#fff;border:2px solid var(--accent)">💾 Simpan</button>
+        <div class="total-row" style="margin-top:50px;padding:20px;border-left:4px double var(--accent);border-right:4px double var(--accent);border-top:4px double var(--accent);border-bottom:4px double var(--accent);border-radius:8px;position:relative;min-height:160px">
+          <button id="pcSave" type="button" class="btn" style="position:absolute;top: -45px;right:120px;height:40px;width: 110px;font-size:12px;background:var(--accent);color:#fff;border:2px solid var(--accent)">💾 Simpan</button>
+<button id="pcSaveAndPrint" type="button" class="btn" style="position:absolute;top: -45px;right:0;height:40px;width: 110px;font-size:12px;background:var(--ok);color:#fff;border:2px solid var(--ok)">🖨️ Simpan & Cetak</button>
           <div style="display:flex;justify-content:space-between;align-items:center">
             <div style="display:flex;flex-direction:column;gap:8px;margin-left:100px">
               
