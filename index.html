@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Percetakan 21 — Owner Pc21</title>
-<link rel="stylesheet" href="style.css">
+<title>Percetakan 21 — Admin 2</title>
+<link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
 <header>
-<div class="title">Percetakan 21 — Owner Pc21</div>
-<span class="small" id="shiftStatus">Belum mula   i</span>
+<div class="title">Percetakan 21 — Admin 2</div>
+<span class="small" id="shiftStatus">Belum mulai</span>
 <span class="small" id="tzDebug" style="margin-left:8px;opacity:.8"></span>
 <button class="btn btn-green" id="btnStart" type="button">Mulai berjualan</button>
 <button class="btn btn-blue" id="btnClose" type="button" disabled>Tutup kas</button>
@@ -71,7 +71,6 @@
 <div id="receipt" style="margin-top:8px">
   <div style="text-align:left;margin-bottom:8px">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
-      
       <div style="width:50px;height:50px;border-radius:8px; border: 3px double var(--accent); display:flex; align-items:center; justify-content:center; font-weight:900; font-size:16px; color:var(--accent-600); flex-shrink: 0;">
         NOTA
       </div>
@@ -97,35 +96,33 @@
 <table><thead><tr><th>Rangkap</th><th>Qty</th><th>Jenis / Nama</th><th>Harga Satuan</th><th>Jumlah</th><th>Aksi</th></tr></thead><tbody id="pcBody"></tbody></table>
 <div class="small" style="text-align:left;line-height:1.4;margin:10px 0 6px;padding:6px 10px;color:#000;background:#f5f9ff;border-top:1px solid #dbe2ef;border-radius:0 0 10px 10px"><b>Nb :</b> <span id="subNote">Menggunakan Kalkulator Auto, Banyak Auto Diskon Siap Harga Langganan.</span> <span style="font-size:10px;opacity:0.7">*Total akan dibulatkan ke seribu rupiah</span></div>
 </div>
-
 <div class="total-row" style="margin-top:6px;padding:20px;border-left:4px double var(--accent);border-right:4px double var(--accent);border-top:4px double var(--accent);border-bottom:4px double var(--accent);border-radius:8px;position:relative;min-height:160px">
-<button id="pcSave" type="button" class="btn" style="position:absolute;top:-50px;right:0;height:40px;width:auto;font-size:12px;background:var(--accent);color:#1f2937;border:2px solid var(--accent)">💾 Simpan</button>
+<button id="pcSave" type="button" class="btn" style="position:absolute;top:-50px;right:0;height:40px;width:auto;font-size:12px;background:var(--accent);color:#fff;border:2px solid var(--accent)">💾 Simpan</button>
 <div style="display:flex;justify-content:space-between;align-items:center">
+<div style="display:flex;flex-direction:column;gap:8px;margin-left:100px">
   
-  <div style="display:flex;flex-direction:column;gap:8px;margin-left:100px">
-    <div style="height:60px"></div>
-    <div style="text-align:center">
-      <div id="pcClear" style="font-size:14px;font-weight:800;color:#000;cursor:pointer"> </div>
-    </div>
+  <div style="height:60px"></div>
+  <div style="text-align:center">
+    <div id="pcClear" style="font-size:14px;font-weight:800;color:#000;cursor:pointer">  </div>
   </div>
-
-  <div style="margin-left:50px;display:flex;flex-direction:column;gap:6px;align-items:flex-end">
-    <div style="display:flex;align-items:center;gap:8px">
-    <input type="checkbox" id="chkLunas" style="width:16px;height:16px;cursor:pointer;margin:0">
-    <label style="font-size:13px;font-weight:700;color:#000;margin:0"><b>Total Rp.</b></label>
-    <input id="pcTotal" class="total-box" readonly value="Rp. 0" inputmode="numeric" style="width:150px;height:32px"/>
-    </div>
-    <div style="display:flex;align-items:center;gap:8px">
-    <div style="width:16px"></div>
-    <label style="font-size:13px;font-weight:700;color:#000"><b>Panjar Rp.</b></label>
-    <input id="pcPanjar" class="total-box" type="text" placeholder="0" inputmode="numeric" style="width:150px;height:32px"/>
-    </div>
-    <div style="display:flex;align-items:center;gap:8px">
-    <div style="width:16px"></div>
-    <label style="font-size:13px;font-weight:700;color:#000"><b>Sisa Rp.</b></label>
-    <input id="pcSisa" class="total-box" type="text" readonly value="" style="width:150px;height:32px"/>
-    </div>
-  </div>
+</div>
+<div style="margin-left:50px;display:flex;flex-direction:column;gap:6px;align-items:flex-end">
+<div style="display:flex;align-items:center;gap:8px">
+<input type="checkbox" id="chkLunas" style="width:16px;height:16px;cursor:pointer;margin:0">
+<label style="font-size:13px;font-weight:700;color:#000;margin:0"><b>Total Rp.</b></label>
+<input id="pcTotal" class="total-box" readonly value="Rp. 0" inputmode="numeric" style="width:150px;height:32px"/>
+</div>
+<div style="display:flex;align-items:center;gap:8px">
+<div style="width:16px"></div>
+<label style="font-size:13px;font-weight:700;color:#000"><b>Panjar Rp.</b></label>
+<input id="pcPanjar" class="total-box" type="text" placeholder="0" inputmode="numeric" style="width:150px;height:32px"/>
+</div>
+<div style="display:flex;align-items:center;gap:8px">
+<div style="width:16px"></div>
+<label style="font-size:13px;font-weight:700;color:#000"><b>Sisa Rp.</b></label>
+<input id="pcSisa" class="total-box" type="text" readonly value="" style="width:150px;height:32px"/>
+</div>
+</div>
 </div>
 <div style="position:absolute;bottom:20px;left:20px">
 <div style="display:flex;gap:8px;align-items:center">
@@ -133,14 +130,12 @@
 <input id="pcCatatan" class="ipt" type="text" style="width:200px;height:32px;font-size:13px;background:#fff;color:#000;border:1px solid #ccc" placeholder="...">
 </div>
 </div>
-
 <div id="paidStamp" style="display:none;position:absolute;top:50%;left:40%;transform:translate(-50%,-50%) rotate(-15deg);font-size:32px;font-weight:900;color:#dc2626;border:3px solid #dc2626;padding:6px 16px;border-radius:6px;opacity:0.85;text-shadow:2px 2px 4px rgba(0,0,0,0.2);font-family:Impact,Arial Black,sans-serif;letter-spacing:2px;background:rgba(255,255,255,0.9)">LUNAS</div>
 
-<div style="position:absolute; top:50%; left:40%; transform: translate(-50%, -50%) scale(0.9); font-size:12px; font-weight:800; color:#000; opacity: 0.7;">
-    Admin: <span id="adminName">Admin_01_Ch</span>
+<div style="position:absolute; top: calc(50% - 30px); left: calc(40% + 30px); transform: translate(-50%, -50%) scale(0.9); font-size:12px; font-weight:800; color:#000; opacity: 0.7;">
+    Admin: <span id="adminName">Admin 2</span>
 </div>
 </div>
-
 </div>
 </div>
 </section>
@@ -148,8 +143,7 @@
 <div class="toast" id="toast"></div>
 <section id="fullReport"></section>
 
-<script src="script.js"></script>
+<script src="assets/js/script.js"></script>
 
 </body>
 </html>
-

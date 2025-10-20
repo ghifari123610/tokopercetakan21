@@ -1,9 +1,10 @@
 (()=>{'use strict';
-const CASHIER_KEY='K2',CASHIER_NAME='Owner Pc21';
+// --- PERUBAHAN ADMIN ---
+const CASHIER_KEY='K4',CASHIER_NAME='Admin 2';
+// -----------------------
 let subActive=false;
 function buildShiftPayloadCompat(st){const shift_id=`${st.date}-${st.idx||1}`;return{date:st.date,jam_mulai:st.start_at,jam_tutup:st.end_at,cashier:CASHIER_NAME,tanggal:st.date,jamMulai:st.start_at,jamTutup:st.end_at,admin:CASHIER_NAME,shift_id,cashier_key:CASHIER_KEY}}
 
-// *** PENTING: Ganti URL ini dengan URL Google Apps Script Kakak ***
 const WEB_APP_URL='https://script.google.com/macros/s/AKfycbypnXCCg7l5mOz1voSstcK2bske8NDTcvnbS2UgnnWfow6FGCEAlpLnq_v1WTSKGuL-hw/exec';
 
 const $=(q,r=document)=>r.querySelector(q);
@@ -16,32 +17,18 @@ function witaDateTime(d=new Date()){const parts=new Intl.DateTimeFormat('id-ID',
 const toast=m=>{const t=$('#toast');t.textContent=m;t.style.display='block';setTimeout(()=>t.style.display='none',1600)};
 
 const el={shiftBadge:$('#shiftStatus'),tz:$('#tzDebug'),kSaldoAwal:$('#kSaldoAwal'),kCash:$('#kCash'),kQris:$('#kQris'),kOmzet:$('#kOmzet'),kExp:$('#kExp'),kLaci:$('#kLaci'),kCashN:$('#kCashN'),kQrisN:$('#kQrisN'),kOmzetN:$('#kOmzetN'),kReal:$('#kReal'),kSelisih:$('#kSelisih'),kSelisihTag:$('#kSelisihTag'),txNama:$('#txNama'),txBarang:$('#txBarang'),txHarga:$('#txHarga'),pill:$('#pricePill'),btnCash:$('#addCash'),btnQris:$('#addQris'),txBody:$('#txBody'),btnStart:$('#btnStart'),btnClose:$('#btnClose'),btnReset:$('#btnReset'),pcCopy:$('#pcCopy'),pcQty:$('#pcQty'),pcType:$('#pcType'),pcAddRow:$('#pcAddRow'),pcBody:$('#pcBody'),pcTotal:$('#pcTotal'),autoHarga:$('#autoHarga'),manualQty:$('#manualQty'),manualCopy:$('#manualCopy'),manualName:$('#manualName'),manualUnitPrice:$('#manualUnitPrice'),manualAdd:$('#manualAdd'),pcTuan:$('#pcTuan'),pcNoHP:$('#pcNoHP'),pcTanggal:$('#pcTanggal'),pcPukul:$('#pcPukul'),pcPanjar:$('#pcPanjar'),pcSisa:$('#pcSisa'),paidStamp:$('#paidStamp'),pcClear:$('#pcClear'),btnPrintReport:$('#btnPrintReport'),fullReport:$('#fullReport'),pcSub:$('#pcSub'),subNote:$('#subNote')};
-const adminSpan=document.getElementById('adminName');if(adminSpan)adminSpan.textContent='Admin_01_Ch';
+const adminSpan=document.getElementById('adminName');if(adminSpan)adminSpan.textContent=CASHIER_NAME;
 
 const apiAddTx = async (payload) => {
   try {
-    console.log('🔄 Mengirim data:', payload);
-    
     const response = await fetch(WEB_APP_URL, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'text/plain;charset=utf-8'
-      },
+      headers: {'Content-Type': 'text/plain;charset=utf-8'},
       body: JSON.stringify({ type: 'add_tx_simple', payload })
     });
-
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}`);
-    }
-
-    const data = await response.text();
-    const jsonData = JSON.parse(data);
-    console.log('✅ Respons:', jsonData);
-    
-    if (jsonData.ok === false) {
-      throw new Error(jsonData.error || 'Server error');
-    }
-
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const jsonData = await response.json();
+    if (jsonData.ok === false) throw new Error(jsonData.error || 'Server error');
     return jsonData;
   } catch (error) {
     console.error('❌ Error kirim:', error);
@@ -62,9 +49,9 @@ function applyIdle(){el.shiftBadge.textContent='Belum mulai';el.btnStart.disable
 function initShift(){const openDate=localStorage.getItem(OPEN_KEY);if(openDate){const st=readState(openDate);if(st&&st.start_at&&!st.end_at){applyStarted(st);return}clearOpen()}const today=fmt.ymd();const stToday=readState(today);if(stToday&&stToday.start_at&&!stToday.end_at){localStorage.setItem(OPEN_KEY,today);applyStarted({...stToday,date:today});return}applyIdle()}
 initShift();
 
-el.btnStart.addEventListener('click',async()=>{const openDate=localStorage.getItem(OPEN_KEY);if(openDate){const st=readState(openDate);if(st&&st.start_at&&!st.end_at){st.end_at=fmt.hms();writeState(openDate,st)}clearOpen()}const d=fmt.ymd();const key='p21_shift_count_'+d;const idx=(parseInt(localStorage.getItem(key)||'0',10)+1);localStorage.setItem(key,String(idx));const st={date:d,start_at:fmt.hms(),end_at:null,idx};writeState(d,st);localStorage.setItem(OPEN_KEY,d);applyStarted(st);toast('Shift '+idx+' dimulai');try{fetch(WEB_APP_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({type:'shift_start',payload:buildShiftPayloadCompat(st)})})}catch(e){}});
+el.btnStart.addEventListener('click',async()=>{const openDate=localStorage.getItem(OPEN_KEY);if(openDate){const st=readState(openDate);if(st&&st.start_at&&!st.end_at){st.end_at=fmt.hmsS();writeState(openDate,st)}clearOpen()}const d=fmt.ymd();const key='p21_shift_count_'+d;const idx=(parseInt(localStorage.getItem(key)||'0',10)+1);localStorage.setItem(key,String(idx));const st={date:d,start_at:fmt.hmsS(),end_at:null,idx};writeState(d,st);localStorage.setItem(OPEN_KEY,d);applyStarted(st);toast('Shift '+idx+' dimulai');try{fetch(WEB_APP_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({type:'shift_start',payload:buildShiftPayloadCompat(st)})})}catch(e){}});
 
-el.btnClose.addEventListener('click',async()=>{const d=localStorage.getItem(OPEN_KEY);if(!d){toast('Tidak ada shift aktif.');return}const st=readState(d);if(!st||!st.start_at||st.end_at){clearOpen();initShift();return}st.end_at=fmt.hms();writeState(d,st);clearOpen();applyClosed(st);try{await fetch(WEB_APP_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({type:'save_shift',payload:{date:st.date,jam_mulai:st.start_at,jam_tutup:st.end_at,cashier:CASHIER_NAME}})});toast(`Shift ${st.idx} ditutup & disimpan`)}catch(e){toast('Gagal menyimpan shift')}});
+el.btnClose.addEventListener('click',async()=>{const d=localStorage.getItem(OPEN_KEY);if(!d){toast('Tidak ada shift aktif.');return}const st=readState(d);if(!st||!st.start_at||st.end_at){clearOpen();initShift();return}st.end_at=fmt.hmsS();writeState(d,st);clearOpen();applyClosed(st);try{await fetch(WEB_APP_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({type:'save_shift',payload:{date:st.date,jam_mulai:st.start_at,jam_tutup:st.end_at,cashier:CASHIER_NAME}})});toast(`Shift ${st.idx} ditutup & disimpan`)}catch(e){toast('Gagal menyimpan shift')}});
 
 el.btnReset.addEventListener('click',()=>{if(!confirm('Reset Shift?'))return;try{clearOpen();Object.keys(localStorage).filter(k=>k.startsWith('p21_shift_state_')).forEach(k=>localStorage.removeItem(k));const d=fmt.ymd();localStorage.removeItem('p21_shift_count_'+d);toast('Shift direset');initShift()}catch(e){alert('Gagal reset: '+e)}});
 
@@ -80,26 +67,7 @@ const KEY_TX_COUNTER='p21_tx_counter_'+CASHIER_KEY,KEY_TX_DATE='p21_tx_date_'+CA
 const nextTxNumber=()=>{const d=fmt.ymd();const last=localStorage.getItem(KEY_TX_DATE);let n=0;if(last===d)n=parseInt(localStorage.getItem(KEY_TX_COUNTER)||'0',10);n++;localStorage.setItem(KEY_TX_COUNTER,String(n));localStorage.setItem(KEY_TX_DATE,d);return String(n).padStart(5,'0')};
 function refreshKPI(){const rows=[...(el.txBody.children||[])];const sumBy=t=>rows.filter(r=>(r.cells[6]?.textContent||'')===t).reduce((s,r)=>s+parseIDR(r.cells[5]?.textContent||'0'),0);const cntBy=t=>rows.filter(r=>(r.cells[6]?.textContent||'')===t).length;const cash=sumBy('Cash'),qris=sumBy('QRIS');const cashN=cntBy('Cash'),qrisN=cntBy('QRIS');const omzet=cash+qris;const omzetN=cashN+qrisN;const saldoAwal=parseIDR2(el.kSaldoAwal.value),pengeluaran=parseIDR2(el.kExp.value),real=parseIDR2(el.kReal.value);const laci=Math.max(0,saldoAwal+cash-pengeluaran);const selisih=real-laci;const tag=selisih===0?{text:'PAS'}:(selisih>0?{text:'LEBIH'}:{text:'KURANG'});el.kCash.textContent=IDR(cash);el.kQris.textContent=IDR(qris);el.kOmzet.textContent=IDR(omzet);el.kCashN.textContent=cashN+'x';el.kQrisN.textContent=qrisN+'x';el.kOmzetN.textContent=omzetN+'x';el.kLaci.textContent=IDR(laci);const absVal=Math.abs(selisih);el.kSelisih.textContent=IDR(absVal);el.kSelisihTag.textContent=tag.text;return{cash,qris,omzet,cashN,qrisN,omzetN,laci,real,selisih}}
 
-const addTx=async(method)=>{if(el.pill.style.pointerEvents==='none'){toast('Mulai shift dulu');return}const nama=(el.txNama.value||'').trim(),barang=(el.txBarang.value||'').trim(),harga=+(el.txHarga.value||0);if(!nama||!harga){toast('Isi nama & harga.');return}const nowD=new Date();const{tanggal:witaTgl,jam:witaJam}=witaDateTime(nowD);const tgljam=`${fmt.ymd(nowD)} ${fmt.hmsS(nowD)}`;const num=nextTxNumber(),kode=`${num}-${method.toUpperCase()}`;const row={Timestamp:tgljam,Tanggal:witaTgl,Jam:witaJam,'Kode Transaksi':kode,'Nama Transaksi':nama,Admin:CASHIER_NAME,Barang:barang,Harga:harga,Metode:method};    const tr = document.createElement('tr');
-    
-    // Create cells safely to prevent XSS
-    const cells = [
-      row.Timestamp,
-      row['Kode Transaksi'],
-      row['Nama Transaksi'],
-      row.Admin,
-      row.Barang || '-',
-      IDR(row.Harga),
-      row.Metode
-    ];
-
-    cells.forEach(cellData => {
-      const td = document.createElement('td');
-      td.textContent = cellData;
-      tr.appendChild(td);
-    });
-
-    el.txBody.insertBefore(tr, el.txBody.firstChild);el.txNama.value='';el.txBarang.value='';setPrice(0);updateButtonsState();try{await apiAddTx(row);toast('Transaksi tersimpan')}catch{toast('Gagal simpan transaksi')}refreshKPI()};
+const addTx=async(method)=>{if(el.pill.style.pointerEvents==='none'){toast('Mulai shift dulu');return}const nama=(el.txNama.value||'').trim(),barang=(el.txBarang.value||'').trim(),harga=+(el.txHarga.value||0);if(!nama||!harga){toast('Isi nama & harga.');return}const nowD=new Date();const{tanggal:witaTgl,jam:witaJam}=witaDateTime(nowD);const tgljam=`${fmt.ymd(nowD)} ${fmt.hmsS(nowD)}`;const num=nextTxNumber(),kode=`${num}-${method.toUpperCase()}`;const row={Timestamp:tgljam,Tanggal:witaTgl,Jam:witaJam,'Kode Transaksi':kode,'Nama Transaksi':nama,Admin:CASHIER_NAME,Barang:barang,Harga:harga,Metode:method};const tr=document.createElement('tr');tr.innerHTML=`<td>${row.Timestamp}</td><td>${row['Kode Transaksi']}</td><td>${row['Nama Transaksi']}</td><td>${row.Admin}</td><td>${row.Barang||'-'}</td><td>${IDR(row.Harga)}</td><td>${row.Metode}</td>`;el.txBody.insertBefore(tr,el.txBody.firstChild);el.txNama.value='';el.txBarang.value='';setPrice(0);updateButtonsState();try{await apiAddTx(row);toast('Transaksi tersimpan')}catch{toast('Gagal simpan transaksi')}refreshKPI()};
 
 el.btnCash?.addEventListener('click',()=>addTx('Cash'));
 el.btnQris?.addEventListener('click',()=>addTx('QRIS'));
@@ -127,68 +95,7 @@ function penjepitSedang(q){if(q<=0)return 0;const start=2000,end=1000,maxQ=50;if
 function leaflet1Sisi(q){if(q<=0)return 0;const start=333,end=285,maxQ=1000;if(q>=maxQ)return Math.round(q*end);const unit=start+((q-1)/(maxQ-1))*(end-start);return Math.round(q*unit)}
 function leaflet2Sisi(q){if(q<=0)return 0;const start=666,end=570,maxQ=500;if(q>=maxQ)return Math.round(q*end);const unit=start+((q-1)/(maxQ-1))*(end-start);return Math.round(q*unit)}
 function getTotal(type,qty){if(type==='A3 Standar')return a4_total(qty)*2;if(type==='A4 Standar')return a4_total(qty);if(type==='F4 Standar')return f4_total(qty);if(type==='A4 Full Color')return a4c(qty);if(type==='F4 Full Color')return f4c(qty);if(type==='A4 PPT 2 Slide')return ppt(qty);if(type==='Pas Foto')return pas(qty);if(type==='Map Bening')return mapBening(qty);if(type==='Jarak Ongkir Maxim')return jarakOngkirMaxim(qty);if(type==='Jilid Lakban')return jilidLakban(qty);if(type==='Ong. Lipat Leaflet')return ongLipatLeaflet(qty);if(type==='Jilid Antero Biasa')return jilidAnteroBiasa(qty);if(type==='Antero Laminating')return anteroLaminating(qty);if(type==='ATK Campur x Rp')return atkCampur(qty);if(type==='Penjepit Kecil')return penjepitKecil(qty);if(type==='Penjepit Sedang')return penjepitSedang(qty);if(type==='Leaflet 1 Sisi')return leaflet1Sisi(qty);if(type==='Leaflet 2 Sisi')return leaflet2Sisi(qty);return 0}
-function makeRow(copy, qty, label, rowTotal, totalLembar) {
-    const unitName = UNIT_MAP[label] || 'Lembar';
-    const unitPerCopy = copy > 0 ? Math.round(rowTotal / copy) : 0;
-    const tr = document.createElement('tr');
-    tr.setAttribute('data-raw', String(rowTotal));
-    tr.setAttribute('data-lembar', String(totalLembar));
-
-    // 1. Rangkap
-    const td1 = document.createElement('td');
-    td1.className = 'rangkapCell';
-    td1.setAttribute('data-copy', copy);
-    td1.setAttribute('contenteditable', 'true');
-    td1.setAttribute('inputmode', 'numeric');
-    td1.textContent = `${copy} x`;
-    tr.appendChild(td1);
-
-    // 2. Qty
-    const td2 = document.createElement('td');
-    td2.className = 'qtyCell';
-    const qtyBox = document.createElement('div');
-    qtyBox.className = 'qtyBox';
-    qtyBox.title = 'Klik untuk ganti satuan';
-    const qtyNum = document.createElement('div');
-    qtyNum.className = 'qtyNum';
-    qtyNum.textContent = qty;
-    const qtyUnit = document.createElement('div');
-    qtyUnit.className = 'qtyUnit';
-    qtyUnit.textContent = unitName;
-    qtyBox.appendChild(qtyNum);
-    qtyBox.appendChild(qtyUnit);
-    td2.appendChild(qtyBox);
-    tr.appendChild(td2);
-
-    // 3. Jenis / Nama (Safe Content)
-    const td3 = document.createElement('td');
-    td3.textContent = label;
-    tr.appendChild(td3);
-
-    // 4. Harga Satuan
-    const td4 = document.createElement('td');
-    td4.className = 'pcUnit';
-    td4.textContent = IDR2(unitPerCopy);
-    tr.appendChild(td4);
-
-    // 5. Jumlah
-    const td5 = document.createElement('td');
-    td5.className = 'pcTotal';
-    td5.textContent = IDR2(rowTotal);
-    tr.appendChild(td5);
-
-    // 6. Aksi
-    const td6 = document.createElement('td');
-    const btn = document.createElement('button');
-    btn.className = 'btn delPc';
-    btn.title = 'Hapus';
-    btn.style.cssText = 'width:34px;height:34px;font-size:16px;border-radius:10px;background:#3b82f6';
-    btn.textContent = '×';
-    td6.appendChild(btn);
-    tr.appendChild(td6);
-
-    return tr;
-}
+function makeRow(copy,qty,label,rowTotal,totalLembar){const unitName=UNIT_MAP[label]||'Lembar';const unitPerCopy=copy>0?Math.round(rowTotal/copy):0;const tr=document.createElement('tr');tr.setAttribute('data-raw',String(rowTotal));tr.setAttribute('data-lembar',String(totalLembar));tr.innerHTML=`<td class="rangkapCell" data-copy="${copy}" contenteditable="true" inputmode="numeric">${copy} x</td><td class="qtyCell"><div class="qtyBox" title="Klik untuk ganti satuan"><div class="qtyNum">${qty}</div><div class="qtyUnit">${unitName}</div></div></td><td>${label}</td><td class="pcUnit">${IDR2(unitPerCopy)}</td><td class="pcTotal">${IDR2(rowTotal)}</td><td><button class="btn delPc" title="Hapus" style="width:34px;height:34px;font-size:16px;border-radius:10px;background:#3b82f6">×</button></td>`;return tr}
 function updateAutoHarga(){const copy=Math.max(1,parseInt(el.pcCopy.value)||0);const qty=Math.max(1,parseInt(el.pcQty.value)||0);const type=el.pcType.value||'A4 Standar';const totalLembar=copy*qty;if(totalLembar<=0){el.autoHarga.value='';return}let rowTotal=getTotal(type,totalLembar);if(subActive)rowTotal=Math.round(rowTotal*0.95);const unitPerLembar=Math.max(0,Math.round(rowTotal/totalLembar));el.autoHarga.value=unitPerLembar?IDR2(unitPerLembar):''}
 el.pcQty?.addEventListener('input',updateAutoHarga);
 el.pcCopy?.addEventListener('input',updateAutoHarga);
@@ -196,15 +103,12 @@ el.pcType?.addEventListener('change',updateAutoHarga);
 updateAutoHarga();
 function refreshPcTotal(){let sum=[...el.pcBody.children].reduce((s,row)=>s+Number(row.getAttribute('data-raw')||0),0);sum=roundUp1000(sum);el.pcTotal.value=IDR2(sum);const panjarVal=parseIDR(el.pcPanjar.value||'0');if(!el.pcPanjar.value.trim()){el.pcSisa.value='';return}const sisa=Math.max(0,sum-panjarVal);el.pcSisa.value=IDR2(sisa)}
 
-// --- PERBAIKAN: Item baru muncul di ATAS ---
 el.pcAddRow?.addEventListener('click',()=>{const copy=Math.max(1,parseInt(el.pcCopy.value)||0),qty=Math.max(1,parseInt(el.pcQty.value)||0),type=el.pcType.value;if(!copy||!qty){alert('Isi Rangkap & Qty');return}const totalLembar=copy*qty;let rowTotal=getTotal(type,totalLembar);if(['A4 Standar','A4 PPT 2 Slide'].includes(type)&&totalLembar<=50){const ratio=(50-totalLembar)/49;rowTotal+=Math.round(500*ratio)}if(subActive)rowTotal=Math.round(rowTotal*0.95);
-el.pcBody.prepend(makeRow(copy,qty,type,rowTotal,totalLembar)); // .prepend() untuk menambah di atas
+el.pcBody.prepend(makeRow(copy,qty,type,rowTotal,totalLembar));
 el.pcQty.value='';updateAutoHarga();refreshPcTotal()});
-
 el.manualAdd?.addEventListener('click',()=>{const q=Math.max(1,parseInt(el.manualQty.value)||1),c=Math.max(1,parseInt(el.manualCopy.value)||1);const name=(el.manualName.value||'').trim();const unit=parseIDR2(el.manualUnitPrice.value);if(!name||!unit){alert('Lengkapi item manual.');return}const totalLembar=q*c;const rowTotal=totalLembar*unit;
-el.pcBody.prepend(makeRow(c,q,`${name} (Manual)`,rowTotal,totalLembar)); // .prepend() untuk menambah di atas
+el.pcBody.prepend(makeRow(c,q,`${name} (Manual)`,rowTotal,totalLembar));
 el.manualQty.value=1;el.manualCopy.value=1;el.manualName.value='';el.manualUnitPrice.value='';refreshPcTotal()});
-// --- AKHIR PERBAIKAN ---
 
 el.pcBody?.addEventListener('click',e=>{const btn=e.target.closest('.delPc')||e.target.closest('.del');if(!btn)return;btn.closest('tr').remove();refreshPcTotal()});
 el.pcClear.addEventListener('click',()=>{
@@ -233,65 +137,12 @@ el.pcClear.addEventListener('click',()=>{
 el.pcPanjar?.addEventListener('input',()=>{const totalVal=parseIDR(el.pcTotal.value||el.pcTotal.textContent||'0');if(!el.pcPanjar.value.trim()){el.pcSisa.value='';return}const panjarVal=parseIDR(el.pcPanjar.value);const sisa=Math.max(0,totalVal-panjarVal);el.pcSisa.value=IDR2(sisa)});
 el.pcSub?.addEventListener('click',()=>{subActive=!subActive;const btn=document.getElementById('pcSub');if(btn){btn.style.background=subActive?'#16a34a':'#dc2626';btn.setAttribute('aria-pressed',String(subActive))}if(el.subNote){el.subNote.textContent=subActive?'Selamat, Anda salah satu pelanggan Setia kami, Anda berhak Mendapat Diskon Khusus dari Kami. Terima kasih Sudah Menjadi Langganan Kami':'Menggunakan Kalkulator Auto, Banyak Auto Diskon Siap Harga Langganan.'}updateAutoHarga()});
 (function inlineInfo(){let locked=false;function fillWITAOnce(){if(locked)return;const parts=new Intl.DateTimeFormat('id-ID',{timeZone:'Asia/Makassar',weekday:'long',day:'2-digit',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit',hour12:false}).formatToParts(new Date());const pick=t=>parts.find(p=>p.type===t)?.value||'';el.pcTanggal.textContent=`${pick('weekday')}, ${pick('day')} ${pick('month')} ${pick('year')}`;el.pcPukul.textContent=`${pick('hour')}:${pick('minute')} WITA`;locked=true}el.pcTuan.addEventListener('input',()=>{if(el.pcTuan.value.trim().length>0)fillWITAOnce()});el.pcTuan.addEventListener('keydown',(e)=>{if(e.key==='Enter'&&el.pcTuan.value.trim().length>0){fillWITAOnce();el.pcTuan.blur()}});const pcClearBtn=document.getElementById('pcClear');if(pcClearBtn){pcClearBtn.addEventListener('click',()=>{locked=false})}})();
-(function tzTick(){const tick=()=>{const tz=Intl.DateTimeFormat().resolvedOptions().timeZone||'unknown';const s=document.getElementById('tzDebug');if(s)s.textContent=`${tz} ${fmt.hms()}`};tick();setInterval(tick,60000)})();
+(function tzTick(){const tick=()=>{const tz=Intl.DateTimeFormat().resolvedOptions().timeZone||'unknown';const s=document.getElementById('tzDebug');if(s)s.textContent=`${tz} ${fmt.hmsS()}`};tick();setInterval(tick,60000)})();
 (function(){const LS_KEY='p21_col_split_v3';const container=document.querySelector('.container');const splitter=document.querySelector('.splitter');if(!container||!splitter)return;function applySplit(frac){frac=Math.max(0.25,Math.min(0.75,frac));const left=(frac*100).toFixed(2);const right=(100-frac*100).toFixed(2);container.style.setProperty('--col-left',`${left}fr`);container.style.setProperty('--col-right',`${right}fr`);try{localStorage.setItem(LS_KEY,JSON.stringify({frac}))}catch(e){}}try{const saved=JSON.parse(localStorage.getItem(LS_KEY)||'null');if(saved&&typeof saved.frac==='number')applySplit(saved.frac)}catch(e){}let dragging=false;splitter.addEventListener('mousedown',(ev)=>{if(window.matchMedia('(max-width:1100px)').matches)return;dragging=true;document.body.style.cursor='col-resize';ev.preventDefault()});window.addEventListener('mousemove',(ev)=>{if(!dragging)return;applySplit((ev.clientX-container.getBoundingClientRect().left)/container.getBoundingClientRect().width)});window.addEventListener('mouseup',()=>{if(!dragging)return;dragging=false;document.body.style.cursor=''});splitter.addEventListener('dblclick',()=>applySplit(0.55))})();
 function collectTransactions(){const rows=[...(el.txBody.children||[])];return rows.map(r=>({t:r.cells[0]?.textContent||'',k:r.cells[1]?.textContent||'',n:r.cells[2]?.textContent||'',a:r.cells[3]?.textContent||'',b:r.cells[4]?.textContent||'',h:r.cells[5]?.textContent||'',m:r.cells[6]?.textContent||''}))}
-function buildReport(){const date=fmt.ymd();const{cash,qris,omzet,cashN,qrisN,omzetN,laci,real,selisih}=refreshKPI();const saldoAwal=parseIDR2(el.kSaldoAwal.value),pengeluaran=parseIDR2(el.kExp.value);const tx=collectTransactions();const cashTx=tx.filter(r=>(r.m||'').toLowerCase()==='cash');const qrisTx=tx.filter(r=>(r.m||'').toLowerCase()==='qris');const st=readState(date);let durasi='';if(st&&st.start_at&&st.end_at){const[hStart,mStart]=st.start_at.split(':');const[hEnd,mEnd]=st.end_at.split(':');let startMinutes=parseInt(hStart,10)*60+parseInt(mStart,10);let endMinutes=parseInt(hEnd,10)*60+parseInt(mEnd,10);if(endMinutes<startMinutes)endMinutes+=24*60;const diffMin=endMinutes-startMinutes;const hours=Math.floor(diffMin/60);const minutes=diffMin%60;durasi=(hours?hours+'j ':'')+minutes+'m'}const selisihAbsV=Math.abs(selisih);const selisihText=selisih<0?`minus ${IDR(selisihAbsV)}`:selisih>0?`Lebih ${IDR(selisihAbsV)}`:`PAS ${IDR(selisihAbsV)}`;const selisihCls=selisih>0?'pos':(selisih<0?'neg':'zero');el.fullReport.innerHTML=`<div class="rtitle">Laporan Harian — Percetakan 21</div><div class="header-info">Tanggal: ${date} • Admin: ${CASHIER_NAME}</div><div class="box" style="margin:8px 0"><div class="kpi-grid"><div class="kpi-item"><div class="k">Saldo Awal</div><div class="v">${IDR(saldoAwal)}</div></div><div class="kpi-item"><div class="k">Cash</div><div class="v">${IDR(cash)} <span class="subtle">(${cashN}x)</span></div></div><div class="kpi-item"><div class="k">QRIS</div><div class="v">${IDR(qris)} <span class="subtle">(${qrisN}x)</span></div></div><div class="kpi-item"><div class="k">Omzet</div><div class="v">${IDR(omzet)} <span class="subtle">(${omzetN}x)</span></div></div><div class="kpi-item"><div class="k">Pengeluaran</div><div class="v">${IDR(pengeluaran)}</div></div><div class="kpi-item"><div class="k">Uang Laci</div><div class="v">${IDR(laci)}</div></div><div class="kpi-item"><div class="k">Uang Real</div><div class="v">${IDR(real)}</div></div><div class="kpi-item"><div class="k">Selisih (Real − Laci)</div><div class="v ${selisihCls}">${selisihText}</div></div><div class="kpi-item"><div class="k">Durasi Shift</div><div class="v">${durasi||'-'}</div></div></div></div><div class="two-columns"><div><table><thead><tr><th>Kode</th><th>Nama</th><th>Keterangan</th><th>Cash Rp.</th></tr></thead><tbody>${cashTx.length?cashTx.map(r=>`<tr><td>${r.k}</td><td>${r.n}</td><td>${r.b}</td><td>${r.h}</td></tr>`).join(''):'<tr><td colspan="4" style="text-align:center;opacity:.7">-</td></tr>'}</tbody></table></div><div><table><thead><tr><th>Kode</th><th>Nama</th><th>Keterangan</th><th>QRIS Rp.</th></tr></thead><tbody>${qrisTx.length?qrisTx.map(r=>`<tr><td>${r.k}</td><td>${r.n}</td><td>${r.b}</td><td>${r.h}</td></tr>`).join(''):'<tr><td colspan="4" style="text-align:center;opacity:.7">-</td></tr>'}</tbody></table></div></div>`}
+function buildReport(){const date=fmt.ymd();const{cash,qris,omzet,cashN,qrisN,omzetN,laci,real,selisih}=refreshKPI();const saldoAwal=parseIDR2(el.kSaldoAwal.value),pengeluaran=parseIDR2(el.kExp.value);const tx=collectTransactions();const cashTx=tx.filter(r=>(r.m||'').toLowerCase()==='cash');const qrisTx=tx.filter(r=>(r.m||'').toLowerCase()==='qris');const st=readState(date);let durasi='';if(st&&st.start_at&&st.end_at){const[hStart,mStart,sStart]=st.start_at.split(':');const[hEnd,mEnd,sEnd]=st.end_at.split(':');let startMinutes=parseInt(hStart,10)*60+parseInt(mStart,10);let endMinutes=parseInt(hEnd,10)*60+parseInt(mEnd,10);if(endMinutes<startMinutes)endMinutes+=24*60;const diffMin=endMinutes-startMinutes;const hours=Math.floor(diffMin/60);const minutes=diffMin%60;durasi=(hours?hours+'j ':'')+minutes+'m'}const selisihAbsV=Math.abs(selisih);const selisihText=selisih<0?`minus ${IDR(selisihAbsV)}`:selisih>0?`Lebih ${IDR(selisihAbsV)}`:`PAS ${IDR(selisihAbsV)}`;const selisihCls=selisih>0?'pos':(selisih<0?'neg':'zero');el.fullReport.innerHTML=`<div class="rtitle">Laporan Harian — Percetakan 21</div><div class="header-info">Tanggal: ${date} • Admin: ${CASHIER_NAME}</div><div class="box" style="margin:8px 0"><div class="kpi-grid"><div class="kpi-item"><div class="k">Saldo Awal</div><div class="v">${IDR(saldoAwal)}</div></div><div class="kpi-item"><div class="k">Cash</div><div class="v">${IDR(cash)} <span class="subtle">(${cashN}x)</span></div></div><div class="kpi-item"><div class="k">QRIS</div><div class="v">${IDR(qris)} <span class="subtle">(${qrisN}x)</span></div></div><div class="kpi-item"><div class="k">Omzet</div><div class="v">${IDR(omzet)} <span class="subtle">(${omzetN}x)</span></div></div><div class="kpi-item"><div class="k">Pengeluaran</div><div class="v">${IDR(pengeluaran)}</div></div><div class="kpi-item"><div class="k">Uang Laci</div><div class="v">${IDR(laci)}</div></div><div class="kpi-item"><div class="k">Uang Real</div><div class="v">${IDR(real)}</div></div><div class="kpi-item"><div class="k">Selisih</div><div class="v ${selisihCls}">${selisihText}</div></div><div class="kpi-item"><div class="k">Durasi Shift</div><div class="v">${durasi}</div></div></div></div><div class="two-columns"><div class="box"><b>Transaksi Cash (${cashN}x)</b><table><thead><tr><th>Waktu</th><th>Kode</th><th>Nama</th><th>Harga</th></tr></thead><tbody>${cashTx.map(r=>`<tr><td>${(r.t||'').split(' ')[1]}</td><td>${r.k}</td><td>${r.n}</td><td>${r.h}</td></tr>`).join('')}</tbody></table></div><div class="box"><b>Transaksi QRIS (${qrisN}x)</b><table><thead><tr><th>Waktu</th><th>Kode</th><th>Nama</th><th>Harga</th></tr></thead><tbody>${qrisTx.map(r=>`<tr><td>${(r.t||'').split(' ')[1]}</td><td>${r.k}</td><td>${r.n}</td><td>${r.h}</td></tr>`).join('')}</tbody></table></div></div>`}
 function printReport(){buildReport();document.body.classList.add('print-report');setTimeout(()=>window.print(),10);window.onafterprint=()=>{document.body.classList.remove('print-report')}}
 el.btnPrintReport?.addEventListener('click',printReport);
-
-function collectCalcData() {
-  const items = [];
-  const rows = el.pcBody.children;
-  
-  console.log('🔍 Collecting data from', rows.length, 'rows');
-  
-  for (let i = 0; i < rows.length; i++) {
-    const tr = rows[i];
-    const qtyBox = tr.querySelector('.qtyBox');
-    const qtyNum = qtyBox ? qtyBox.querySelector('.qtyNum') : null;
-    const qty = parseInt(qtyNum?.textContent || '0');
-    
-    const jenis = tr.cells[2]?.textContent?.trim() || '';
-    const unitText = tr.querySelector('.pcUnit')?.textContent || 'Rp. 0';
-    const hargaSatuan = parseIDR(unitText);
-    const jumlahText = tr.querySelector('.pcTotal')?.textContent || 'Rp. 0';
-    const jumlah = parseIDR(jumlahText);
-    
-    items.push({
-      'Qty': qty,
-      'jenis pesanan': jenis,
-      'harga satuan': hargaSatuan,
-      'Jumlah': jumlah
-    });
-  }
-  
-  const totalVal = parseIDR(el.pcTotal.value || el.pcTotal.textContent || '0');
-  const panjarVal = parseIDR(el.pcPanjar.value || '0');
-  const sisaVal = parseIDR(el.pcSisa.value || '0');
-  const tuan = (el.pcTuan.value || '').trim();
-  const noHP = (el.pcNoHP.value || '').trim();
-  const catatan = (document.getElementById('pcCatatan')?.value || '').trim();
-  const lunas = document.getElementById('chkLunas')?.checked || false;
-  
-  const now = new Date();
-  const {tanggal: witaTgl, jam: witaJam} = witaDateTime(now);
-  const timestampDetail = `${witaTgl} ${witaJam}`;
-  
-  const result = {
-    'Tuan': tuan,
-    'Nomor HP': noHP,
-    'timestamp detail': timestampDetail,
-    'Detail': items,
-    'Total': totalVal,
-    'Panjar': panjarVal,
-    'sisa': sisaVal,
-    'Catatan': catatan + (lunas ? ' [LUNAS]' : '')
-  };
-  
-  console.log('📊 Final collected data:', result);
-  return result;
-}
 
 async function saveCalcToSheet() {
   if(!el.pcBody || el.pcBody.children.length === 0) {
@@ -299,39 +150,41 @@ async function saveCalcToSheet() {
     return false;
   }
   
-  const calcData = collectCalcData();
-  console.log('📊 Data collected:', calcData);
-  
+  const rows = [...el.pcBody.children].map(tr => {
+    const qty = parseInt(tr.querySelector('.qtyNum')?.textContent || '0');
+    const jenis = tr.cells[2]?.textContent?.trim() || '';
+    const hargaSatuan = parseIDR(tr.querySelector('.pcUnit')?.textContent || 'Rp. 0');
+    const jumlah = parseIDR(tr.querySelector('.pcTotal')?.textContent || 'Rp. 0');
+    return { 'Qty': qty, 'jenis pesanan': jenis, 'harga satuan': hargaSatuan, 'Jumlah': jumlah };
+  });
+
   const now = new Date();
   const {tanggal: witaTgl, jam: witaJam} = witaDateTime(now);
-  const timestamp = `${witaTgl} ${witaJam}`;
   
+  // --- PERUBAHAN CATATAN ---
+  const catatanInput = (document.getElementById('pcCatatan')?.value || '').trim();
+  const lunasText = document.getElementById('chkLunas')?.checked ? ' [LUNAS]' : '';
+  const finalCatatan = `${CASHIER_NAME} : ${catatanInput}${lunasText}`;
+  // -------------------------
+
   const payload = {
-    'Tuan': calcData.Tuan,
-    'Nomor HP': calcData['Nomor HP'],
-    'timestamp detail': calcData['timestamp detail'],
-    'Detail': calcData.Detail,
-    'Total': calcData.Total,
-    'Panjar': calcData.Panjar,
-    'sisa': calcData.sisa,
-    'Catatan': calcData.Catatan
+    'Tuan': (el.pcTuan.value || '').trim(),
+    'Nomor HP': (el.pcNoHP.value || '').trim(),
+    'timestamp detail': `${witaTgl} ${witaJam}`,
+    'Detail': rows,
+    'Total': parseIDR(el.pcTotal.value || '0'),
+    'Panjar': parseIDR(el.pcPanjar.value || '0'),
+    'sisa': parseIDR(el.pcSisa.value || '0'),
+    'Catatan': finalCatatan
   };
-  
-  console.log('🔄 Sending payload to PESANAN:', payload);
-  
+
   try {
     const response = await fetch(WEB_APP_URL, {
       method: 'POST',
       headers: {'Content-Type': 'text/plain;charset=utf-8'},
-      body: JSON.stringify({
-        type: 'add_tx_pesanan',
-        payload: payload
-      })
+      body: JSON.stringify({ type: 'add_tx_pesanan', payload: payload })
     });
-    
     const result = await response.json();
-    console.log('📨 Server response:', result);
-    
     if (result.ok) {
       toast('✅ Nota tersimpan ke sheet PESANAN!');
       return true;
@@ -339,7 +192,6 @@ async function saveCalcToSheet() {
       toast('❌ Gagal: ' + (result.error || 'Unknown error'));
       return false;
     }
-    
   } catch (error) {
     console.error('❌ Network error:', error);
     toast('❌ Gagal kirim data');
@@ -349,47 +201,5 @@ async function saveCalcToSheet() {
 
 const btnSave=document.getElementById('pcSave');if(btnSave){btnSave.addEventListener('click',async()=>{if(el.pcBody.children.length===0){alert('Belum ada item di nota!');return}const confirmed=confirm('Simpan nota ini ke spreadsheet?');if(!confirmed)return;await saveCalcToSheet()})}
 const chkLunas=document.getElementById('chkLunas');const paidStamp=document.getElementById('paidStamp');if(chkLunas&&paidStamp){chkLunas.addEventListener('change',()=>{paidStamp.style.display=chkLunas.checked?'block':'none'})}
-(function enableLeaveGuard(){function shouldGuard(){try{if(document.body.classList.contains('print-report'))return false;var OPEN_KEY='p21_shift_open_date';var open=localStorage.getItem(OPEN_KEY);var active=false;if(open){var st=(function(d){try{return JSON.parse(localStorage.getItem('p21_shift_state_'+d)||'null')}catch(e){return null}})(open);active=!!(st&&st.start_at&&!st.end_at)}var draftPrice=(+el.txHarga.value||0)>0;var draftName=(el.txNama.value||'').trim().length>0||(el.txBarang.value||'').trim().length>0;var hasCalcRows=!!(el.pcBody&&el.pcBody.children&&el.pcBody.children.length>0);var hasPanjar=(el.pcPanjar&&el.pcPanjar.value||'').trim().length>0;var hasReal=(el.kReal&&el.kReal.value||'').trim().length>0;return active||draftPrice||draftName||hasCalcRows||hasPanjar||hasReal}catch(e){return false}}window.addEventListener('beforeunload',function(e){if(!shouldGuard())return;e.preventDefault();e.returnValue=''})})();
+(function enableLeaveGuard(){function shouldGuard(){try{if(document.body.classList.contains('print-report'))return false;var open=localStorage.getItem(OPEN_KEY);var active=false;if(open){var st=readState(open);active=!!(st&&st.start_at&&!st.end_at)}var draftPrice=(+el.txHarga.value||0)>0;var draftName=(el.txNama.value||'').trim().length>0||(el.txBarang.value||'').trim().length>0;var hasCalcRows=!!(el.pcBody&&el.pcBody.children&&el.pcBody.children.length>0);var hasPanjar=(el.pcPanjar&&el.pcPanjar.value||'').trim().length>0;var hasReal=(el.kReal&&el.kReal.value||'').trim().length>0;return active||draftPrice||draftName||hasCalcRows||hasPanjar||hasReal}catch(e){return false}}window.addEventListener('beforeunload',function(e){if(!shouldGuard())return;e.preventDefault();e.returnValue=''})})();
 refreshKPI()})();
-
-// Fungsi test untuk debug
-function testSavePesanan() {
-  const testData = {
-    'Tuan': 'Test Customer',
-    'timestamp detail': '2024-01-01 10:00:00',
-    'Detail': [
-      {
-        'Qty': 100,
-        'jenis pesanan': 'A4 Standar',
-        'harga satuan': 285,
-        'Jumlah': 28500
-      },
-      {
-        'Qty': 50,
-        'jenis pesanan': 'A4 Full Color', 
-        'harga satuan': 650,
-        'Jumlah': 32500
-      }
-    ],
-    'Total': 61000,
-    'Panjar': 30000,
-    'sisa': 31000,
-    'Catatan': 'Test dari debug'
-  };
-  
-  console.log('🧪 Testing with data:', testData);
-  
-  fetch(WEB_APP_URL, {
-    method: 'POST',
-    headers: {'Content-Type': 'text/plain;charset=utf-8'},
-    body: JSON.stringify({
-      type: 'add_tx_pesanan',
-      payload: testData
-    })
-  })
-  .then(r => r.json())
-  .then(result => console.log('✅ Test result:', result))
-  .catch(err => console.error('❌ Test error:', err));
-}
-
-// Jalankan di console browser: testSavePesanan()
